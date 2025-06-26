@@ -7,64 +7,90 @@ using System.Threading.Tasks;
 
 namespace P3AddNewFunctionalityDotNetCore.Models.Repositories
 {
+    /// <summary>
+    /// Provides methods to manage and access product data from the database.
+    /// </summary>
     public class ProductRepository : IProductRepository
     {
-        private static P3Referential _context;
+        private readonly P3Referential _context;
+        //private static P3Referential _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProductRepository"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
         public ProductRepository(P3Referential context)
         {
-                _context = context;
+            _context = context;
         }
+
+        /// <summary>
+        /// Retrieves a product by its unique identifier.
+        /// </summary>
+        /// <param name="id">The product ID.</param>
+        /// <returns>The product if found; otherwise, null.</returns>
         public async Task<Product> GetProduct(int id)
         {
-            var product = await _context.Product.SingleOrDefaultAsync(m => m.Id == id);
-            return product;
+            return await _context.Product.SingleOrDefaultAsync(m => m.Id == id);
         }
 
+        /// <summary>
+        /// Retrieves all products asynchronously.
+        /// </summary>
+        /// <returns>A list of products.</returns>
         public async Task<IList<Product>> GetProduct()
         {
-            var products = await _context.Product.ToListAsync();
-            return products;
-        }
-        /// <summary>
-        /// Get all products from the inventory
-        /// </summary>
-        public IEnumerable<Product> GetAllProducts()
-        {
-            IEnumerable<Product> productEntities= _context.Product.Where(p => p.Id > 0);
-            return productEntities.ToList();
+            return await _context.Product.ToListAsync();
         }
 
         /// <summary>
-        /// Update the stock of a product by its id
+        /// Retrieves all products in the inventory (synchronously).
         /// </summary>
+        /// <returns>An enumerable of all products.</returns>
+        public IEnumerable<Product> GetAllProducts()
+        {
+            return _context.Product.Where(p => p.Id > 0).ToList();
+        }
+
+        /// <summary>
+        /// Updates the stock quantity of a product and removes it if quantity becomes 0.
+        /// </summary>
+        /// <param name="id">The product ID.</param>
+        /// <param name="quantityToRemove">The quantity to subtract from current stock.</param>
         public void UpdateProductStocks(int id, int quantityToRemove)
         {
             Product product = _context.Product.First(p => p.Id == id);
-            product.Quantity = product.Quantity - quantityToRemove;
+            product.Quantity -= quantityToRemove;
 
             if (product.Quantity == 0)
+            {
                 _context.Product.Remove(product);
+            }
             else
             {
                 _context.Product.Update(product);
-                _context.SaveChanges();
-            }   
+            }
+
+            _context.SaveChanges();
         }
 
+        /// <summary>
+        /// Saves a new product to the database.
+        /// </summary>
+        /// <param name="product">The product to save.</param>
         public void SaveProduct(Product product)
         {
             if (product != null)
             {
-               
-
                 _context.Product.Add(product);
                 _context.SaveChanges();
             }
         }
 
-  
-
+        /// <summary>
+        /// Deletes a product from the database by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the product to delete.</param>
         public void DeleteProduct(int id)
         {
             Product product = _context.Product.First(p => p.Id == id);

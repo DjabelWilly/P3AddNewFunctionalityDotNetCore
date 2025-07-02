@@ -132,4 +132,10 @@
   <data name="ErrorStockValue" xml:space="preserve">
     <value>El valor de la acción debe ser un número mayor que cero</value>
   </data>
+  <data name="PriceNotANumber" xml:space="preserve">
+    <value>El valor introducido para el precio debe ser un número</value>
+  </data>
+  <data name="StockNotAnInteger" xml:space="preserve">
+    <value>El valor introducido para la acción debe ser un entero</value>
+  </data>
 </root>

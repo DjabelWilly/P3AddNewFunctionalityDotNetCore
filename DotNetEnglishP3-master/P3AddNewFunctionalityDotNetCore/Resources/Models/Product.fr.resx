@@ -132,4 +132,10 @@
   <data name="ErrorStockValue" xml:space="preserve">
     <value>Le stock doit être un nombre supérieur à zéro</value>
   </data>
+  <data name="PriceNotANumber" xml:space="preserve">
+    <value>La valeur saisie pour le prix doit être un nombre</value>
+  </data>
+  <data name="StockNotAnInteger" xml:space="preserve">
+    <value>La valeur saisie pour le stock doit être un entier</value>
+  </data>
 </root>

@@ -53,33 +53,26 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
 
 
         /// <summary>
-        /// Handles the POST request to create a new product. 
-        /// Validates the product using the product service, adds any validation errors to the ModelState, 
-        /// and saves the product if the model is valid. 
-        /// Redirects to the Admin page upon successful creation, or returns the form view with validation errors otherwise.
+        /// Check if the ModelState is valid.
+        /// If so, it posts the new product created.
+        /// Only accessible to authorized users.
         /// </summary>
-        /// <param name="product">The product data submitted from the form.</param>
-        /// <returns>A redirect to the Admin action if successful; otherwise, the Create view with validation messages.</returns>
+        /// <param name="product">the product to add.</param>
+        /// <returns>The Admin page view</returns> 
         [Authorize]
         [HttpPost]
         public IActionResult Create(ProductViewModel product)
         {
-            List<string> modelErrors = _productService.CheckProductModelErrors(product);           
-
-            foreach (string error in modelErrors)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", error);
+                return View();
             }
 
-            if (ModelState.IsValid)
-            {
-                _productService.SaveProduct(product);
-                return RedirectToAction("Admin");
-            }
-            else
-            {
-                return View(product);
-            }
+            // Le modèle est valide, on peut enregistrer
+            _productService.SaveProduct(product);
+
+            // Redirection vers la page Admin après succès
+            return RedirectToAction("Admin");
         }
 
         /// <summary>

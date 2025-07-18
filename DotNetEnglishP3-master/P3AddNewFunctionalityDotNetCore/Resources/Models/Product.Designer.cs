@@ -61,6 +61,15 @@ namespace P3AddNewFunctionalityDotNetCore.Resources.Models {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Please enter a valid name.
+        /// </summary>
+        public static string ErrorInvalidName {
+            get {
+                return ResourceManager.GetString("ErrorInvalidName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à Please enter a name.
         /// </summary>
         public static string ErrorMissingName {

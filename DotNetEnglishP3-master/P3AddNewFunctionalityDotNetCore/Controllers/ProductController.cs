@@ -65,7 +65,7 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View();
+                return View(product);
             }
 
             // Le modèle est valide, on peut enregistrer

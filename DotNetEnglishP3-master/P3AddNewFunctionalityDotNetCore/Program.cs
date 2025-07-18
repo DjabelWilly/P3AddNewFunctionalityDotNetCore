@@ -1,21 +1,24 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using P3AddNewFunctionalityDotNetCore.Models.Repositories;
-using P3AddNewFunctionalityDotNetCore.Models.Services;
-using P3AddNewFunctionalityDotNetCore.Models;
 using Microsoft.AspNetCore.Identity;
-using P3AddNewFunctionalityDotNetCore.Data;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using P3AddNewFunctionalityDotNetCore;
+using P3AddNewFunctionalityDotNetCore.Data;
+using P3AddNewFunctionalityDotNetCore.ModelBinders;
+using P3AddNewFunctionalityDotNetCore.Models;
+using P3AddNewFunctionalityDotNetCore.Models.Repositories;
+using P3AddNewFunctionalityDotNetCore.Models.Services;
+using System.Globalization;
 using System.Linq;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+//builder.Services.AddControllersWithViews();
 
 builder.Services.AddLocalization(opts => { opts.ResourcesPath = "Resources"; });
 builder.Services.AddSingleton<ICart, Cart>();
@@ -45,6 +48,20 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
 });
 
+// -------------------
+// Définition de la culture par défaut du thread
+// -------------------
+var defaultCulture = new CultureInfo("fr-FR"); // "fr-FR" pour la virgule décimale
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
+// -------------------
+
+builder.Services.AddControllersWithViews(options =>
+{
+    // Ajoute le provider du Modelbinder custom en priorité (index 0)
+    options.ModelBinderProviders.Insert(0, new InvariantDoubleModelBinderProvider());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -63,7 +80,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 var supportedCultures = new[] { "en-GB", "en-US", "en", "fr-FR", "fr", "es-ES", "es" };
-var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+var localizationOptions = new RequestLocalizationOptions()
+     .SetDefaultCulture("fr-FR") // default culture "FR"
     .AddSupportedCultures(supportedCultures.ToArray())
     .AddSupportedUICultures(supportedCultures);
 app.UseRequestLocalization(localizationOptions);

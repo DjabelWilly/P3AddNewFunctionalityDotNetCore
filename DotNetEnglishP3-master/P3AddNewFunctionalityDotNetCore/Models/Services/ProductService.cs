@@ -11,16 +11,37 @@ using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
 namespace P3AddNewFunctionalityDotNetCore.Models.Services
 {
     /// <summary>
-    /// Service responsible for managing products, including retrieving,
-    /// validating, updating stock quantities, saving, and deleting products.
+    /// Service responsible for managing products, including retrieval, creation, update, deletion, and cart-related logic.
     /// </summary>
     public class ProductService : IProductService
     {
+        /// <summary>
+        /// Represents the shopping cart instance used for managing cart operations.
+        /// </summary>
         private readonly ICart _cart;
+
+        /// <summary>
+        /// Provides access to product-related data storage operations.
+        /// </summary>
         private readonly IProductRepository _productRepository;
+
+        /// <summary>
+        /// Provides access to order-related data storage operations.
+        /// </summary>
         private readonly IOrderRepository _orderRepository;
+
+        /// <summary>
+        /// Provides localized strings for the ProductService class.
+        /// </summary>
         private readonly IStringLocalizer<ProductService> _localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProductService"/> class with the specified dependencies.
+        /// </summary>
+        /// <param name="cart">The shopping cart implementation.</param>
+        /// <param name="productRepository">The product repository implementation.</param>
+        /// <param name="orderRepository">The order repository implementation.</param>
+        /// <param name="localizer">The string localizer for localization support.</param>
         public ProductService(ICart cart, IProductRepository productRepository,
             IOrderRepository orderRepository, IStringLocalizer<ProductService> localizer)
         {
@@ -31,44 +52,39 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
 
         /// <summary>
-        /// Retrieves all products and maps them to view models for display purposes.
+        /// Retrieves all products from the repository and maps them to their corresponding view models.
         /// </summary>
-        /// <returns>A list of ProductViewModel instances.</returns>
+        /// <returns>A list of <see cref="ProductViewModel"/> representing all products.</returns>
         public List<ProductViewModel> GetAllProductsViewModel()
         {
-
             IEnumerable<Product> productEntities = GetAllProducts();
             return MapToViewModel(productEntities);
         }
 
         /// <summary>
-        /// Maps a collection of Product entities to a list of ProductViewModel objects.
+        /// Maps a collection of <see cref="Product"/> entities to a list of <see cref="ProductViewModel"/> objects.
         /// </summary>
-        /// <param name="productEntities">The collection of Product entities.</param>
-        /// <returns>A list of ProductViewModel objects.</returns>
+        /// <param name="productEntities">The collection of product entities to map.</param>
+        /// <returns>A list of mapped view models.</returns>
         private static List<ProductViewModel> MapToViewModel(IEnumerable<Product> productEntities)
         {
-            List <ProductViewModel> products = new List<ProductViewModel>();
-            foreach (Product product in productEntities)
-            {
-                products.Add(new ProductViewModel
-                {
-                    Id = product.Id,
-                    Stock = product.Quantity,
-                    Price = product.Price,
-                    Name = product.Name,
-                    Description = product.Description,
-                    Details = product.Details
-                });
-            }
+            var culture = CultureInfo.CurrentCulture;
 
-            return products;
+            return productEntities.Select(product => new ProductViewModel
+            {
+                Id = product.Id,
+                Stock = product.Quantity,
+                Price = (double)product.Price,
+                Name = product.Name,
+                Description = product.Description,
+                Details = product.Details
+            }).ToList();
         }
 
         /// <summary>
-        /// Retrieves all products from the repository.
+        /// Retrieves all product entities from the repository.
         /// </summary>
-        /// <returns>A list of Product entities.</returns>
+        /// <returns>A list of <see cref="Product"/> objects.</returns>
         public List<Product> GetAllProducts()
         {
             IEnumerable<Product> productEntities = _productRepository.GetAllProducts();
@@ -76,54 +92,50 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
 
         /// <summary>
-        /// Retrieves a single product by its ID and maps it to a ProductViewModel.
+        /// Retrieves a single product view model by its identifier.
         /// </summary>
         /// <param name="id">The product ID.</param>
-        /// <returns>The corresponding ProductViewModel.</returns>
+        /// <returns>The <see cref="ProductViewModel"/> with the given ID, or null if not found.</returns>
         public ProductViewModel GetProductByIdViewModel(int id)
         {
-            List<ProductViewModel> products = GetAllProductsViewModel().ToList();
-            return products.Find(p => p.Id == id);
+            return GetAllProductsViewModel().Find(p => p.Id == id);
         }
 
         /// <summary>
-        /// Retrieves a single product entity by its ID.
+        /// Retrieves a single product entity by its identifier.
         /// </summary>
         /// <param name="id">The product ID.</param>
-        /// <returns>The corresponding Product entity.</returns>
-         public Product GetProductById(int id)
+        /// <returns>The <see cref="Product"/> with the given ID, or null if not found.</returns>
+        public Product GetProductById(int id)
         {
-            List<Product> products = GetAllProducts().ToList();
-            return products.Find(p => p.Id == id);
+            return GetAllProducts().Find(p => p.Id == id);
         }
 
         /// <summary>
-        /// Asynchronously retrieves a single product by ID from the repository.
+        /// Asynchronously retrieves a single product entity by its identifier from the repository.
         /// </summary>
         /// <param name="id">The product ID.</param>
-        /// <returns>The corresponding Product entity.</returns>
+        /// <returns>A task representing the asynchronous operation. The result contains the product entity.</returns>
         public async Task<Product> GetProduct(int id)
         {
-            var product = await _productRepository.GetProduct(id);
-            return product;
+            return await _productRepository.GetProduct(id);
         }
 
         /// <summary>
-        /// Asynchronously retrieves all products from the repository.
+        /// Asynchronously retrieves all product entities from the repository.
         /// </summary>
-        /// <returns>A list of Product entities.</returns>
+        /// <returns>A task representing the asynchronous operation. The result contains a list of product entities.</returns>
         public async Task<IList<Product>> GetProduct()
         {
-            var products = await _productRepository.GetProduct();
-            return products;
+            return await _productRepository.GetProduct();
         }
 
         /// <summary>
-        /// Updates the stock quantities of all products based on the contents of the shopping cart.
+        /// Updates the stock quantities of products in the cart by decreasing their quantity in the repository.
         /// </summary>
         public void UpdateProductQuantities()
         {
-            Cart cart = (Cart) _cart;
+            Cart cart = (Cart)_cart;
             foreach (CartLine line in cart.Lines)
             {
                 _productRepository.UpdateProductStocks(line.Product.Id, line.Quantity);
@@ -131,9 +143,9 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
 
         /// <summary>
-        /// Saves a new product to the repository after mapping it from a view model.
+        /// Saves a new product to the repository based on the provided view model.
         /// </summary>
-        /// <param name="product">The product view model to save.</param>
+        /// <param name="product">The product view model to be saved.</param>
         public void SaveProduct(ProductViewModel product)
         {
             var productToAdd = MapToProductEntity(product);
@@ -141,25 +153,24 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
 
         /// <summary>
-        /// Maps a ProductViewModel to a Product entity.
+        /// Maps a <see cref="ProductViewModel"/> to a <see cref="Product"/> entity.
         /// </summary>
-        /// <param name="product">The view model to convert.</param>
-        /// <returns>The corresponding Product entity.</returns>
+        /// <param name="product">The view model to map.</param>
+        /// <returns>The mapped product entity.</returns>
         private static Product MapToProductEntity(ProductViewModel product)
         {
-            Product productEntity = new Product
+            return new Product
             {
                 Name = product.Name,
-                Price = product.Price,
+                Price = (double)product.Price,
                 Quantity = product.Stock,
                 Description = product.Description,
                 Details = product.Details
             };
-            return productEntity;
         }
 
         /// <summary>
-        /// Deletes a product by its ID and removes it from the cart if present.
+        /// Deletes a product by its ID, removing it from the cart and repository.
         /// </summary>
         /// <param name="id">The ID of the product to delete.</param>
         public void DeleteProduct(int id)

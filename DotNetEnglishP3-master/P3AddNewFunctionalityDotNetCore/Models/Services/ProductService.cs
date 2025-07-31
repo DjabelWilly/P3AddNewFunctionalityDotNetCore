@@ -170,16 +170,30 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
 
         /// <summary>
-        /// Deletes a product by its ID, removing it from the cart and repository.
+        /// Deletes a product by its ID, removing it from the repository
+        /// only IF the product is not present in cart instance. 
         /// </summary>
         /// <param name="id">The ID of the product to delete.</param>
         public void DeleteProduct(int id)
         {
-            // TODO what happens if a product has been added to a cart and has been later removed from the inventory ?
-            // delete the product form the cart by using the specific method
-            // => the choice is up to the student
-            _cart.RemoveLine(GetProductById(id));
+            // Check if the product to delete is not present in cart.
+            // If it is present, cannot delete product and sends a message to UI.
+            // If it is not, delete the product from the cart and repository.
+            var product = GetProductById(id);
 
+            Cart cart = _cart as Cart;
+
+            if (cart != null)
+            {
+                foreach (CartLine line in cart.Lines)
+                {
+                    if (line.Product.Id == id)
+                    {
+                        // send message to front 
+                        throw new InvalidOperationException(_localizer["CannotDeleteProduct"]);
+                    }
+                }
+            }
             _productRepository.DeleteProduct(id);
         }
     }

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotDeleteProduct" xml:space="preserve">
+    <value>No se puede eliminar este producto porque actualmente está en el carrito.</value>
+  </data>
   <data name="MissingName" xml:space="preserve">
     <value>Introduzca un nombre</value>
   </data>

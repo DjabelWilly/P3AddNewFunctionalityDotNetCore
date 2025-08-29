@@ -8,7 +8,7 @@ using Xunit;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
-    // Classe mock pour tester Regex sur Stock type string
+    // Classe mock pour tester Regex sur Stock avec un type string
     public class ProductViewModelMock
     {
         [Required(

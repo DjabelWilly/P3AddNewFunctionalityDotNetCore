@@ -24,12 +24,22 @@
     <Compile Remove="Startup.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="appsettings.Test.json" />
+  </ItemGroup>
+
   <!-- <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup> -->
 
   <ItemGroup>
   <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="appsettings.Test.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 

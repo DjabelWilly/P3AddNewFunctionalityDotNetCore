@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using P3AddNewFunctionalityDotNetCore.Data;
@@ -10,7 +11,7 @@ namespace P3AddNewFunctionalityDotNetCore.IntegrationTests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // Surcharge pour utiliser le fichier config de test
+            // Charge la config spécifique aux tests
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.Test.json", optional: false);
@@ -18,15 +19,14 @@ namespace P3AddNewFunctionalityDotNetCore.IntegrationTests
 
             builder.ConfigureServices(services =>
             {
-                // Construit un scope pour accéder au DbContext
                 using var scope = services.BuildServiceProvider().CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<P3Referential>();
 
-                // Réinitialisation complète de la base
+                // Réinitialise la DB
                 db.Database.EnsureDeleted();
-                db.Database.EnsureCreated(); 
+                db.Database.EnsureCreated();
 
-                // Seed les données de test
+                // Génère la liste de produits pour les tests
                 TestDataSeeder.SeedTestProducts(db);
             });
         }
